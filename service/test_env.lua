@@ -20,8 +20,30 @@ skynet.start(function()
     skynet.error("Myname is ", name, ", ", age, " years old.")
 
     -- 错误：不要尝试设置已经存在的变量值，会报错
-    skynet.setenv("myname", 'coder')
-    skynet.setenv("myage", 21)
+    --[[
+        [:01000012] LAUNCH snlua test_env
+        [:01000012] Myname is  Dmaker ,  20  years old.
+        [:01000012] init service failed: ./lualib/skynet.lua:558: Can't setenv                                                                                                                                         exist key : myname
+        stack traceback:
+                [C]: in function 'assert'
+                ./lualib/skynet.lua:558: in function 'skynet.setenv'
+                ./../service/test_env.lua:23: in upvalue 'start'
+                ./lualib/skynet.lua:935: in function <./lualib/skynet.lua:933>
+                [C]: in function 'xpcall'
+                ./lualib/skynet.lua:937: in function 'skynet.init_service'
+                ./lualib/skynet.lua:950: in upvalue 'f'
+                ./lualib/skynet.lua:253: in function <./lualib/skynet.lua:252>
+        [:01000012] KILL sel
+    ]]
+    -- skynet.setenv("myname", 'coder')
+    -- skynet.setenv("myage", 21)
 
-    
+    -- 设置一个新的环境变量
+    skynet.setenv("mynewname", "coder")
+    skynet.setenv("mynewage", 22)
+
+    name = skynet.getenv("mynewname")
+    age = skynet.getenv("mynewage")
+
+    skynet.error("My new name is ", name, ", ", age, " years old soon.")
 end)
