@@ -13,4 +13,5 @@ skynet.start(function (  )
         us = skynet.uniqueservice(args[1])
     end
     skynet.error("uniqueservice handler: ", skynet.address(us))
+    skynet.exit()
 end)
