@@ -18,4 +18,10 @@ skynet.start(function()
     local name = skynet.getenv("myname")
     local age = skynet.getenv("myage")
     skynet.error("Myname is ", name, ", ", age, " years old.")
+
+    -- 错误：不要尝试设置已经存在的变量值，会报错
+    skynet.setenv("myname", 'coder')
+    skynet.setenv("myage", 21)
+
+    
 end)
