@@ -8,5 +8,5 @@ skynet.init = function (  )
 end
 
 skynet.start = function (  )
-    skynet.error("service start")
+    skynet.error("service start") 
 end
