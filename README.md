@@ -15,6 +15,6 @@ skynet.localname(aliasname)
     1. 当查询本地别名时，返回servicehandler,不存在就返回nil
     2. 当查询全局别名时，返回servicehandler,不存在就阻塞等待到该服务初始化完成
 ]]
-local skynet = require("skynet.harbor")
-skynet.queryname(aliasname)
+local harbor = require("skynet.harbor")
+harbor.queryname(aliasname)
 ```
