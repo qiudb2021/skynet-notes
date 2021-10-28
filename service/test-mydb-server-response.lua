@@ -11,7 +11,7 @@ function command.SET( key, value )
     db[key] = value
 end
 
-skynet.star(function (  )
+skynet.start(function (  )
     skynet.dispatch("lua", function ( session, address, cmd, ... )
         local response = skynet.response(skynet.pack)
         skynet.fork(function ( cmd, ... )
@@ -19,7 +19,7 @@ skynet.star(function (  )
             cmd = cmd:upper()
             local f = command[cmd]
             if f then
-                response(true, (...))
+                response(true, f(...))
             else
                 skynet.error(string.format( "Unknown command %s", tostring(cmd) ))
             end
