@@ -1,4 +1,4 @@
-local skynet = requre "skynet"
+local skynet = require "skynet"
 function task(  )
     skynet.error("task")
     skynet.error("start time", skynet.starttime())
