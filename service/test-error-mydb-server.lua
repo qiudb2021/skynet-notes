@@ -26,7 +26,7 @@ skynet.start(function (  )
             else
                 skynet.error(string.format( "Unknown command %s", tostring(cmd) ))
             end
-        end)
+        end, cmd, ...)
         
     end)
 
