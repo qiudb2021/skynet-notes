@@ -96,4 +96,12 @@ skynet.rawcall(addr, type, msg, sz)
 skynet.ret(msg, sz)
 -- 目标服务将...参数列表的消息打包后调用skynet.ret回应
 skynet.retpack(...)
+-- 参数pack指定应答打包函数，不填默认使用skynet.pack，必须根据接收到的消息的打包函数一致
+-- 返回值是一个闭包函数
+local response = skynet.response(pack)
+-- 闭包函数的使用方式
+-- 参数ok的值可以是 "test",true,false,
+-- test表示检查接收响应的服务是否存在
+-- true表发送应答PTYPE_RESPONSE，为false时表示发送PTYPE_ERROR错误消息
+response(ok, ...)
 ```
