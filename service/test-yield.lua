@@ -5,7 +5,7 @@ function task( name )
     skynet.error(name, "begin task")
     while i < 20000*10000 do
         i = i + 1
-        if i % 500 * 10000 == 0 then
+        if i % (500 * 10000) == 0 then
             skynet.yield()
             skynet.error(name, "task yield")
         end
