@@ -9,5 +9,5 @@ end
 
 skynet.start(function (  )
     skynet.error("start co: ", coroutine.running( ))
-    skynet.fork(task, 500)
+    skynet.fork(task, 5000)
 end)
