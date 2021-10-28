@@ -5,7 +5,7 @@ local function dosomething(session, address, ...)
     skynet.error("session", session)
     skynet.error("address", skynet.address(address))
     local args = {...}
-    for k, v in pairs(args) do
+    for i, v in pairs(args) do
         skynet.error("arg"..i..":", v)
 
     end
