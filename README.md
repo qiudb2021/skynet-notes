@@ -41,3 +41,59 @@ skynet.now()
 -- 通过starttime和now计算出当前UTC时间
 skynet.time()
 ```
+## 服务间消息通信
+### 消息类型
+```c
+skynet.h
+
+#define PTYPE_TEXT 0
+#define PTYPE_RESPONSE 1    // 表示一个回应包
+#define PTYPE_MULTICAST 2   // 广播消息
+#define PTYPE_CLIENT 3      // 用来处理网络客户端的请求消息
+#define PTYPE_SYSTEM 4      // 系统消息
+#define PTYPE_HARBOR 5      // 跨节点消息
+#define PTYPE_SOCKET 6      // 套接字消息
+// read lualib/skynet.lua examples/simplemonitor.lua
+#define PTYPE_ERROR 7	    // 错误消息
+// read lualib/skynet.lua lualib/mqueue.lua lualib/snax.lua
+#define PTYPE_RESERVED_QUEUE 8
+#define PTYPE_RESERVED_DEBUG 9
+#define PTYPE_RESERVED_LUA 10   //lua类型的消息
+#define PTYPE_RESERVED_SNAX 11  //snax服务消息
+
+#define PTYPE_TAG_DONTCOPY 0x10000
+#define PTYPE_TAG_ALLOCSESSION 0x20000
+```
+```lua
+local skynet = require "skynet"
+-- 为type类型的消息设定消息处理函数func
+-- 当一个服务收到消息时，Skynet会开启新的协程并调用它
+skynet.dispatch(type, func)
+-- session：消息的唯一id
+-- source: 消息来源
+-- cmd: 消息名
+local func = function (session, source, cmd, ...)
+    ...
+end
+
+-- 消息打包,返回两个参数：
+-- 1. msg: (C指针)指向的数据包起始地址，
+-- 2. sz: 数据包的长度
+local msg, sz = skynet.pack(...)
+-- 消息解包
+skynet.unpack(msg, sz)
+-- 用type类型向addr发送未打包的消息。该函数会自动把...参数列表进行打包，默认情况下lua消息使用skynet.pack打包
+-- addr: 可以是服务句柄，也可以是服务别名
+skynet.send(addr, type, ...)
+-- 用type类型向 addr 发送一个打包消息
+-- addr: 可以是服务句柄，也可以是服务别名
+skynet.rawsend(addr, type, msg, sz)
+-- 向addr发送type类型的未打包消息并等待返回响应，并对回应信息进行解包（自动打包与解包）
+skynet.call(addr, type, ...)
+-- 直接向addr发送type类型的打包消息，不对回应信息解包（需要自己打包与解包）
+skynet.rawcall(addr, type, msg, sz)
+-- 目标服务消息处理后需要通过该函数将结果返回
+skynet.ret(msg, sz)
+-- 目标服务将...参数列表的消息打包后调用skynet.ret回应
+skynet.retpack(...)
+```
