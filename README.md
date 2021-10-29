@@ -111,4 +111,21 @@ local queue = require "skynet.queue"
 local cs = queue()
 -- 将func丢到执行队列中去执行
 cs(func, ...)
+
+-- 使用source服务地址，发送typename类型的消息给dest服务，不需要接收响应(source/dest只能是服务ID)
+-- msg, sz一般使用skynet.pack打包生成
+skynet.redirect(dest, source, typename, session, msg, sz)
+```
+## 组播
+```lua
+local mc = require "skynet.multicast"
+-- 创建一个频道，成功创建后，channel.channel是这个频道的id
+local channel = mc.new()
+-- 创建一个新频道，利用已知的频道 id 绑定一个已有频道
+local channel2 = mc.new({
+    -- 绑定上一个频道
+    channel = channel.channel,
+    -- 设置这个频道的处理消息
+    dispatch = function (channel, source, ...) end
+})
 ```
