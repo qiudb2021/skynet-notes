@@ -104,4 +104,11 @@ local response = skynet.response(pack)
 -- test表示检查接收响应的服务是否存在
 -- true表发送应答PTYPE_RESPONSE，为false时表示发送PTYPE_ERROR错误消息
 response(ok, ...)
+
+-- 服务临界区:
+local queue = require "skynet.queue"
+-- 获取一个执行队列
+local cs = queue()
+-- 将func丢到执行队列中去执行
+cs(func, ...)
 ```
