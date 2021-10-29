@@ -21,7 +21,7 @@ skynet.start(function (  )
         cmd = cmd:upper()
         local f = command[cmd]
         if f then
-            skynet.retpack(cs(f(...)))
+            skynet.retpack(cs(f,...))
         else
             skynet.error(string.format( "Unknown command %s", tostring(cmd) ))
         end
