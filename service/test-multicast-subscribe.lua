@@ -15,4 +15,8 @@ skynet.start(function (  )
         -- 设置这个频道的消息处理函数
         dispatch = recvChannel,
     })
+    channel:subscribe()
+    skynet.timeout(500, function (  )
+        channel:delete()
+    end)
 end)
