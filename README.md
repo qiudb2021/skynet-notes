@@ -223,3 +223,47 @@ local channel = sc.channel({
     response = dispatch
 });
 ```
+## 域名查询
+```lua
+local dns = require "skynet.dns"
+-- 设置dns服务器，port默认值为53，如果不填写ip的话，将从/etc/resolv.conf中找到合适的ip
+dns.server(ip, port)
+-- 查询name对应的ip,如果ipv6为true的话则查询ipv6地址；默认为false。如果查询失败将抛出异常，成功则返回ip,以及一张包含所有ip的表。
+dns.resolve(name, ipv6)
+-- 默认情况下，模块会根据TTL值cache来查询结果。在查询超时的情况下，也可能返回之前的结果。可以用来清空cache。注意：cache保存在调用者的服务中，并非针对整个skynet进程。所以推荐写一个独立的 dns查询服务统一处理dns查询。
+dns.flush()
+```
+## snax服务基础api
+```lua
+local snax = require "snax"
+-- 可以把一个服务启动多份。传入服务名和参数，它会返回一个对象，用于和这个启动服务交互。
+-- 如果多次调用newservice，即使名字相同，也会生成多份服务的实例，它们各自独立，由不同的对象区分。
+-- 注意：返回的不是一个服务地址，而是一个对象
+snax.newservice(name, ...)
+-- 在一个节点上只会启动一份同名服务。如果多次调用它，会返回相同的对象。
+snax.uniqueservice(name, ...)
+-- 整个skynet网络中只会有一个同名服务
+snax.globalservice(name, ...)
+
+-- 查询当前节点的具名服务，返回一个服务对象，如果服务尚未启动，那么一直阻塞等待它启动完毕
+snax.queryservice(name)
+-- 查询一个全局名字的服务，返回一个服务对象。如果服务尚未启动，那么一直阻塞等待它启动完毕
+snax.queryglobal(name)
+-- 用来获取自己这个服务对象，与skynet.self不同(它是服务句柄)
+snax.self()
+
+-- 让一个snax服务退出
+snax.kill(obj, ...)
+-- 退出当前服务等同于snax.kill(snax.self(), ...)
+snax.exit()
+
+-- 通过snax服务地址获取snax服务对象
+-- 对于匿名服务，你无法在别处通过名字得到和它交互的对象。
+-- 如果你有这个需求，可以把对象的handle通过消息发送给别人，handle是一个数字，即snax服务的skynet地址。
+-- 把服务地址转换成服务对象，第2个参数需要传入服务的启动名，以用来了解这个服务有哪些远程方法可以供调用。
+-- 当然你也可以直接把.type和.handle一起发送过去，而不必在源码上约定
+snax.bind(handle, typename)
+
+-- snax启动查找服务路径是config.path的snax变量来指定
+snax = root.."examples/?.lua;"..root.."test/?.lua;".."my_workspace/?.lua"
+```
