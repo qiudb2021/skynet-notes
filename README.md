@@ -128,4 +128,65 @@ local channel2 = mc.new({
     -- 设置这个频道的处理消息
     dispatch = function (channel, source, ...) end
 })
+
+-- 向频道发布消息
+channel:publish(...)
+-- 订阅消息
+channel:subscribe()
+-- 取消订阅
+channel:unsubscribe()
+-- 回收频道
+channel:delete()
+```
+##  skynet.socket 常用api
+```lua
+local socket = require "skynet.socket"
+-- 建立一个 TCP 连接，返回一个数字 id
+socket.open(address, port)
+-- 关闭一个连接，这个API有可能阻塞住执行流。因为如果有其它coroute正在阻塞读这个id对应的连接，会先驱使读操作结束，close操作才返回
+socket.close(id)
+-- 在极其罕见的情况下，需要粗暴的直接关闭某个连接，而避免socket.close的阻塞等待流程，可以使用它
+socket.close_fd(id)
+-- 强行闭关一个连接。和close不同的是它不会等待可能存在的其它coroute的读操作
+-- 一般不建议使用这个API，但如果你需要在__gc元方法中闭关连接的话，shutdown是一个比close更好的选择（因为gc中无法切换协程
+socket.shutdown(id)
+--[[
+    从一个socket上读取sz指定的字节数。
+    如果读到了指定长度的字符串，它把这个字符串返回
+    如果是连接断开导致字节数不够，将返回一个false加上读到的字符串
+    如果sz为nil，则返回尽可能多的字节数，但至少读到一个字节(若无新数据，会阻塞)
+]]
+socket.read(id, sz)
+-- 从一个socket上读所有的数据，直到socket主动断开，或在其它协程用socket.close断开
+socket.readall(id)
+-- 从一个socket上读取一行数据。sep指行分割符。默认sep为"\n",读到的字符串是不包含这个分割符的。
+-- 如果另一端关闭了，这个时候会返回nil,如果buff中有未读数据则作为第2个返回值返回
+socket.readline(id, sep)
+-- 等待一个socket可读
+socket.blok(id)
+-- 把一个字符串置入正常的写队列，skynet框架会在socket可写时发送给它
+socket.write(id, str)
+-- 把字符串写入低优先级队列。如果正常的写队列还有写操作未完成时，低优先级上的队列永远不会被发出。
+-- 只有正常写队列为空时，才会处理低优先级队列。但是，每次写的字符串都可以被看成原子操作，不会只发送一半，然后转去发送正常写队列的数据
+socket.lwrite(id, str)
+-- 监听一个端口，返回一个id，供start使用
+socket.listen(address, port)
+--[[
+    accept是一个函数。每当一个监听的id对应的socket上有连接接入的时候，都会调用accept函数。这个函数会得到接入连接的ide及ip地址。
+    每当accpet函数获得一个新的socket id后，并不会立即收到这个socket上的数据。这是因为，我们有时候会希望把这个socket的操作权转让给别的服务去处理
+]]
+socket.start(id, accept)
+--[[
+    任何一个服务只有在调用socket.start(id)之后，才可以读到这个socket上的数据。向一个socket id写数据也需要先调用start
+    socket的id对于整个skynet节点都是公开的。也就是说，你可以把这个id通过消息发送给其它服务，其他服务也可以去操作它。skynet框架是根据调用start这个api的位置来决定把对应socket上的数据转发到哪里去的
+]]
+socket.start(id)
+-- 清除socket id在本服务内的数据结构，但并不关闭这个socket。这可以用于你把id发送给其它服务，以转交socket的控制权
+socket.abandon(id)
+--[[
+    当id对应的socket上待发送的数据超过1MB后，系统将调用callback以示警告。
+    function callback(id, size)回调函数接收两个参数id和size，size的单位是K。
+    如果不设置回调，那么每增加64k则skynet.error写一行错误信息
+]]
+socket.warning(id, callback)
 ```
