@@ -23,8 +23,9 @@ local function accept(fd, addr)
 end
 
 skynet.start(function (  )
-    local addr = "0.0.0.0:8888"
+    local addr = "0.0.0.0:8001"
     skynet.error("listen "..addr)
     local fd = socket.listen(addr)
+    assert(fd)
     socket.start(fd, accept)
 end)
