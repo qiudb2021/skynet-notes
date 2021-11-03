@@ -194,7 +194,7 @@ socket.warning(id, callback)
 ```lua
 local skynet = require "skynet"
 local sc = require "skynet.socketchannel"
--- 创建一个channel，其中host可以是ip地址或者域名，port：端口号
+-- 1. 创建一个channel，其中host可以是ip地址或者域名，port：端口号
 local channel = sc.channel({
     host = "127.0.0.1",
     port = 8001
@@ -212,4 +212,14 @@ local channel = sc.channel({
 ]]
 channel:request(request, response, padding)
 channel:close()
+
+local channel = sc.channel({
+    host = "127.0.0.1",
+    port = 8001,
+    --[[
+        dispatch是一个解析回应包的函数，和上面提到的responsse解析函数类似。
+        其返回值有3个，第1个是这个回应包的session，第2个是包解析是否正确，第3个是回应内容
+    ]]
+    response = dispatch
+});
 ```
