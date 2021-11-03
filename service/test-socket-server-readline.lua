@@ -4,12 +4,15 @@ local socket = require "skynet.socket"
 function echo( fd, addr )
     socket.start(fd)
     while true do
-        local str = socket.read(fd)
+        local str, endstr = socket.read(fd)
         if str then
             skynet.error("recv from( ", addr, ")", str)
             socket.write(fd, string.upper( str ))
         else
             socket.close(fd)
+            if endstr then
+                skynet.error("last recv "..endstr)
+            end
             skynet.error(addr, ' disconnect')
             return
         end
