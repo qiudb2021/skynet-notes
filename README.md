@@ -190,3 +190,26 @@ socket.abandon(id)
 ]]
 socket.warning(id, callback)
 ```
+## socketchannel
+```lua
+local skynet = require "skynet"
+local sc = require "skynet.socketchannel"
+-- 创建一个channel，其中host可以是ip地址或者域名，port：端口号
+local channel = sc.channel({
+    host = "127.0.0.1",
+    port = 8001
+});
+
+--[[
+    request: 是需要发送的请求 
+    reponse: 是一个函数，用来接收响应的数据
+        -- 接收响应的数据必须这么定义，sock就是与远端TCP连接的套接字，通过这个套接字可以把数据读出来
+        function response(sock)
+            -- 返回值必须要有两个，第一个如果是true则表示响应数据是有效的
+            return true, sock:read()
+        end
+    -- 该函数阻塞，返回读到的内容
+]]
+channel:request(request, response, padding)
+channel:close()
+```
