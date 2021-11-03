@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 local socket = require "skynet.socket"
 
-local function clent(id)
+local function client(id)
     local i = 0
     while i < 3 do
         skynet.error("send data"..i)
