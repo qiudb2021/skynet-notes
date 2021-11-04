@@ -271,5 +271,10 @@ snax.bind(handle, typename)
 -- snax启动查找服务路径是config.path的snax变量来指定
 snax = root.."examples/?.lua;"..root.."test/?.lua;".."my_workspace/?.lua"
 
-
+--[[
+  snax 是支持热更新的（只能热更新 snax 框架编写的 lua 服务）。
+  但热更新更多的用途是做不停机的 bug 修复，不应用于常规的版本更新。
+  所以，热更新的 api 被设计成下面这个样子。更适合打补丁。
+]]
+snax.hotfix(obj, patchcode) 
 ```
