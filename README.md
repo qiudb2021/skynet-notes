@@ -278,3 +278,25 @@ snax = root.."examples/?.lua;"..root.."test/?.lua;".."my_workspace/?.lua"
 ]]
 snax.hotfix(obj, patchcode) 
 ```
+## 网关服务
+```lua
+local gateserver = require "snax.gateserver"
+
+-- 必须提供一张表，表里面定义connect message等相关回调函数
+local handler = {}
+
+-- 当一个客户端连接进来，gateserver自动处理连接，并且调用该函数
+function handler.connect(id, addr)
+    -- 连接成功不代表马上可以读到数据，需要打开这个套接字，允许fd接收数据
+    gateserver.openclient(fd)
+end
+
+function handler.disconnect(fd)
+end
+
+function handler.message(fd, msg, sz)
+end
+
+-- 网关服务的入口函数
+gatesever.start()
+```
