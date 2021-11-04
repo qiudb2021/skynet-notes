@@ -1,6 +1,11 @@
 local skynet = require "skynet"
 local snax = require "skynet.snax"
 
+function response.echo( str )
+    skynet.error("echo ", str)
+    return string.upper( str )
+end
+
 function accept.hello( ... )
     skynet.error("hello", ...)
 end
