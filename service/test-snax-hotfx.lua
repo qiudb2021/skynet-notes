@@ -12,6 +12,13 @@ skynet.start(function (  )
         local i
         function accept.hello( ... )
             skynet.error("fix hello ", i, gname)
+            skynet.error("ing...")
         end
     ]])
+
+    skynet.error("hotfix return ", r)
+
+    -- after hotfix
+    obj.post.hello()
+    obj.post.quit()
 end)
