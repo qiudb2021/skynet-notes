@@ -4,11 +4,11 @@ local dns = require "skynet.dns"
 
 local commands = {}
 
-function command.FLUSH(  )
+function commands.FLUSH(  )
     return dns.flush()
 end
 
-function command.GETIP( domain )
+function commands.GETIP( domain )
     return dns.resolve(domain)
 end
 
@@ -22,6 +22,6 @@ skynet.start(function (  )
         else
             skynet.error(string.format( "Unknown command %s", tostring(cmd) ))
         end
-        skynet.register(".dnsservice")
     end)
+    skynet.register(".dnsservice")
 end)
