@@ -239,7 +239,11 @@ local snax = require "snax"
 -- 可以把一个服务启动多份。传入服务名和参数，它会返回一个对象，用于和这个启动服务交互。
 -- 如果多次调用newservice，即使名字相同，也会生成多份服务的实例，它们各自独立，由不同的对象区分。
 -- 注意：返回的不是一个服务地址，而是一个对象
-snax.newservice(name, ...)
+local obj = snax.newservice(name, ...)
+-- 无响应请求，obj是snax对象，post表示无响应请求，CMD具体的请求指令，...为请求参数列表。发送完马上返回
+obj.post.cmd(...)
+-- 有响应请求，obj是snax对象，req表示有响应请求，CMD具体的请求指令，...为请求参数列表。发送完后等待响应
+obj.req.cmd(...)
 -- 在一个节点上只会启动一份同名服务。如果多次调用它，会返回相同的对象。
 snax.uniqueservice(name, ...)
 -- 整个skynet网络中只会有一个同名服务
@@ -266,4 +270,6 @@ snax.bind(handle, typename)
 
 -- snax启动查找服务路径是config.path的snax变量来指定
 snax = root.."examples/?.lua;"..root.."test/?.lua;".."my_workspace/?.lua"
+
+
 ```
