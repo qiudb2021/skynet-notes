@@ -279,6 +279,7 @@ snax = root.."examples/?.lua;"..root.."test/?.lua;".."my_workspace/?.lua"
 snax.hotfix(obj, patchcode) 
 ```
 ## 网关服务
+### 1. 网关服务api
 ```lua
 local gateserver = require "snax.gateserver"
 
@@ -290,13 +291,36 @@ function handler.connect(id, addr)
     -- 连接成功不代表马上可以读到数据，需要打开这个套接字，允许fd接收数据
     gateserver.openclient(fd)
 end
-
+-- 当一个客户端断开连接后调用该函数，必须要有
 function handler.disconnect(fd)
 end
 
+-- 当fd有数据到达了，会调用这个函数，前提是fd需要调用gateserver.openclient打开
 function handler.message(fd, msg, sz)
+end
+
+-- 如果你希望监听端口打开的时候，做一些初始化操作，可以提供open这个方法
+-- source：请求来源地址，conf 是开启 gate服务的参数列表(端口、连接数、是否延迟)
+function handler.open(sourcce, conf)
+end
+
+-- 当一个连接异常(通常意味着断开)，error 方法被调用，除了fd，还会拿到错误信息 msg(通常用于log输出)
+function handler.error(fd, msg)
+end
+
+-- 当fd上待发送的数据累积超过1MB后，将会调用这个方法
+function handler.warning(fd, size)
 end
 
 -- 网关服务的入口函数
 gatesever.start()
+```
+### 2. 打包与解包
+打包与解包TCP网路数据可以使用skynet.netpack库
+```lua
+local netpack = require "skynet.netpack"
+-- 打包数据str,返回一个C指针msg, sz(申请内存)
+local msg, sz = netpack.pack(str)
+-- 解包数据，返回一个lua的字符串，会释放内存
+netpack.tostring(msg, sz)
 ```
