@@ -3,6 +3,12 @@ local gateserver = require "snax.gateserver"
 local netpack = require "skynet.netpack"
 
 local handler = {}
+local CMD = {}
+
+function CMD.kick(source, fd)
+    skynet.error("source: ", skynet.address(source), "kick fd: ", fd);
+    gateserver.closeclient(fd)
+end
 
 function handler.connect( fd, addr )
     skynet.error("client addr ", addr, "fd: ", fd)
@@ -32,4 +38,8 @@ function handler.open( source, conf )
     skynet.error("nodelay ", conf.nodelay)
 end
 
+function handler.command( cmd, source, ... )
+    local f = assert(CMD[cmd])
+    return f(source, ...)
+end
 gateserver.start(handler)
