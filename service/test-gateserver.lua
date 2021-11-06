@@ -16,9 +16,5 @@ end
 function handler.message( fd, msg, sz )
     skynet.error("recv message from fd: ", fd, netpack.tostring(msg, sz))
 end
-<<<<<<< HEAD
 
-
-gateserver.start(handler)
-=======
 gateserver.start(handler)
