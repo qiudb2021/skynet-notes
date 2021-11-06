@@ -3,7 +3,7 @@ local skynet = require "skynet"
 skynet.start(function (  )
     skynet.error("Gate Server start")
     -- 启动网关服务
-    local gateserver = skynet.newservice("test-gate-server")
+    local gateserver = skynet.newservice("test-gateserver")
     -- 需要给网关服务发送open消息，来启动监听
     skynet.call(gateserver, "lua", "open", {
         port = 8001, -- 监听端口
