@@ -324,3 +324,103 @@ local msg, sz = netpack.pack(str)
 -- 解包数据，返回一个lua的字符串，会释放内存
 netpack.tostring(msg, sz)
 ```
+### 3. skynet自带的网关服务
+网关服务相关文件：
+1. *service/gate.lua* 网关服务代码
+2. *examples/watchdog.lua* 使用网关服务
+3. *examples/agent.lua* 代理（watchdog中使用到agent）
+4. 启动watchdog服务的代码在*examples/main.lua*
+5. skynet网关架构图：
+![Image text](./images/3-skynet网关架构.png)
+* newservice watchdog 启动看门狗服务，lua start conf给看门狗发送lua消息start参数为conf
+* newservice gate 启动网关服务，lua open conf给网关发送lua消息open，参数为conf
+* new connection 客户端连接进来。
+* lua socket open fd addr 给看门狗发送lua消息(socket open)参数为open fd addr
+* new service agent 启动一个客户端代理服务，lua start {gate, fd, watchdog}给代理发送lua消息start, 参数为{gate, fd, watchdog}
+* lua forward fd 给网关发送lua消息forward，参数为fd(到此，连接建立成功，可以进行网络通讯了)
+* send request客户端发送请求给看门狗
+* client 1 msg sz 看门狗把请求转发成client消息，session为1
+* send response 代理直接给客户端发送响应。
+
+按照从1到9的依次去看代码，需要强调的是：
+* gate主要负责的是client连接创建与断开以及接收到的消息转发给agent
+* watchdog主要负责gate的创建，agent的创建与退出
+* agent主要负责接收gate转发的请求，处理业务，然后直接把应答发送给client
+  
+![Image text](images/4-skynet网关时序图.png)
+---
+## 14. 登录服务
+登录服务需要解决的问题：
+1. 用户登录信息保密工作
+2. 实际登录点分配工作
+### 14.1 加密算法
+#### 14.1.1 DHexchange密钥交换算法
+DHexchange密钥交换算法主要用来协商一个服务器与客户端的密钥
+```lua
+package.cpath = "lualib/?.so"
+local crypt = require "client.crypt"
+-- 如果在skynet中使用，则用
+local crypt = require "skynet.crypt"
+
+-- dhexchange转换8字节的key
+crypt.dhexchange(key)
+-- 通过key1与key2得到密钥
+crypt.dhsecret(key1, key2)
+```
+#### 14.1.2 随机数
+```lua
+package.cpath = "lualib/?.so"
+local crypt = require "client.crypt"
+-- 如果在skynet中使用，则用
+local crypt = require "skynet.crypt"
+
+-- 产生一个8字节的随机数，一般作为加密算法的随机密钥
+crypt.randomkey()
+```
+#### 14.1.3 hmac64哈希算法
+主要用于密钥验证
+```lua
+package.cpath = "lualib/?.so"
+local crypt = require "client.crypt"
+-- 如果在skynet中使用，则用
+local crypt = require "skynet.crypt"
+
+-- HMAC64利用哈希算法，以一个密钥secret和一个消息challenge为输入，生成一个消息摘要hmax作为输出
+local hmac = crypt.hmac64(challenge, secret)
+```
+#### 14.1.4 base64编码解码
+Base64就是一种基于64个可打印字符来表示二进制数据的方法
+```lua
+package.cpath = "lualib/?.so"
+local crypt = require "client.crypt"
+-- 如果在skynet中使用，则用
+local crypt = require "skynet.crypt"
+
+-- 编码
+crypt.base64encode(str)
+-- 解码
+crypt.base64decode(str)
+```
+#### 14.1.5 DES加密解密
+```lua
+package.cpath = "lualib/?.so"
+local crypt = require "client.crypt"
+-- 如果在skynet中使用，则用
+local crypt = require "skynet.crypt"
+
+-- 用key加密plaintext得到密文，key必须是8字节
+crypt.desencode(key, plaintext)
+-- 用key解密ciphertext得到明文，key必须是8字节
+crypt.desdecode(key, ciphertext)
+```
+#### 14.1.6 hashkey算法
+只能哈希小于8个字节的数据，返回8字节数据的hash
+```lua
+package.cpath = "lualib/?.so"
+local crypt = require "client.crypt"
+-- 如果在skynet中使用，则用
+local crypt = require "skynet.crypt"
+
+-- 只能哈希小于8个字节的数据，返回8字节数据的hash
+crypt.hashkey(str)
+```
