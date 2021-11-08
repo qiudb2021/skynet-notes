@@ -1,10 +1,10 @@
-package.cpath = "../skynet/lualib/?.so"
+package.cpath = "./skynet/luaclib/?.so"
 
 local socket = require "client.socket"
 local crypt = require "client.crypt"
 
-if _VERSION ~= "Lua 5.3" then
-    error "Use lua 5.3"
+if _VERSION ~= "Lua 5.4" then
+    error "Use lua 5.4"
 end
 
 local fd = socket.connect("127.0.0.1", 8001)
@@ -47,7 +47,7 @@ local function unpack_f(f)
             if result then
                 return result
             end
-            socket.unsleep(100)
+            socket.usleep(100)
         end
     end
 end
@@ -56,7 +56,7 @@ local readline = unpack_f(unpack_line)
 -- 接收chanellenge
 local challenge = crypt.base64decode(readline())
 
-local clientkey = crypt.raddomkey()
+local clientkey = crypt.randomkey()
 
 -- 把clientkey换算成ckey，发送给服务器
 local ckey = crypt.dhexchange(clientkey)
@@ -85,6 +85,7 @@ local function encode_token(token)
     )
 end
 
+print("token ", encode_token(token))
 -- 使用DES加密token得到etoken，etoken是字节流
 local etoken = crypt.desencode(secret, encode_token(token))
 etoken = crypt.base64encode(etoken)

@@ -12,7 +12,9 @@ local server = {
 function server.auth_handler( token )
     -- the token is base64(user)@base64(server):base64(password)
     -- 通过正则表达式，解析出各个参数
-    local user, server, password = token:match("([^@]+)@([^:+]):(.+)")
+    skynet.error("token ", token)
+    local user, server, password = token:match("(.+)@(.+):(.+)")
+    skynet.error("user ", user, "server ", server, "password ", password)
     user = crypt.base64decode(user)
     server = crypt.base64decode(server)
     password = crypt.base64decode(password)
