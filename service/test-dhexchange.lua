@@ -7,3 +7,8 @@ print("clientkey: ", clientkey)
 
 local ckey = crypt.dhexchange(clientkey)
 print("ckey:\t", crypt.hexencode(ckey))
+
+local serverkey = "22222222"
+print("serverkey: ", serverkey)
+local skey = crypt.dhexchange(serverkey)
+print("skey:\t", crypt.hexencode(skey));
