@@ -424,3 +424,57 @@ local crypt = require "skynet.crypt"
 -- 只能哈希小于8个字节的数据，返回8字节数据的hash
 crypt.hashkey(str)
 ```
+### 14.2 loginserver原理图
+skynet提供了一个通用的登录服务器模板snax.loginserver，框架原理图如下：
+![Image text](images/5-loginserver.png)
+
+login服务开始监听，客户端主动去连接login服务，他们之间的通讯协议是行结尾协议（每个数据包都是一行ascii字符，如果要发送byte字节流，则通过base64编码）。这里称login服务为L，客户端服务为C
+1. L产生随机数challenge，并发送给C，主要用于最后验证密钥secret是否交换成功。
+2. C产生随机数clientkey，clientkey是保密的，只有C知道，并通过dhexchange算法换算clientkey,得到ckey。把base64编码的ckey发送给L
+3. L也产生随机数serverkey，serverkey是保密的，只有L知道，并通过dhexchange算法换算serverkey，得到skey。把base64编码的skey发送给L
+4. C使用clientkey, skey通过hdserect算法得到最终安全密钥secret
+5. L使用serverkey, ckey通过hdsecret算法得到最终安全密钥secret。C和L最终得到的secret是一样的，而传输过程只有ckey、skey是通过网络公开的，即使ckey、skey泄露了，也无法推算出secret.
+6. 密钥交换完成后，需要验证一下双方的密钥是否是一致的。C使用密钥secret通过hmac64哈希算法加密第1步是接收到的challenge，得到SHmac，对比SHmac与CHmac，然后转码成base64 CHmac发送给L。
+7. L收到CHmac后，自己也使用密钥ssecret通过hmac64哈希算法加密第1步中发送出去的challenge，得到SHmac，对比SHmac与Chmac是否一致，如果一致，则密钥交换成功。否则就断开连接。
+8. C组合base64 user@base64 server:base64 passwd字符串（server为客户端具体想要登录的登录点，远端服务器可能有多个实际登录点），使用secret通过DES加密，得到etoken。
+9. 使用sserect通过DES解密etoken，得到user@server:passwd，校验user与passwd是否正确，通知实际登录点server，传递user与secret给server, server生成subid返回，发送状态码200 base64 subid给C
+10. C得到subid后就可以断开login服务的连接，然后去连接实际登录点server了。（实际登录点server，可以由L通知C，也可以C指定想要登录哪个点）
+### 14.3 loginserver模板
+```lua
+local login = require "snax.loginserver"
+local server = {
+    host = "0.0.0.0", -- 监听地址，通常是0.0.0.0
+    port = 8001,      -- 监听端口
+    -- multilogin是一个boolean，默认是false。
+    -- 关闭后当一个用户正在走登录流程时，禁止同一用户名进行登录。
+    -- 如果你用户可以同时登录，可以打开这个开头，但需要自己处理好潜在的并行的状态管理问题
+    multilogin = false, -- disallow multilogin
+    -- name是一个内部使用的名字，不要和skynet其它服务重名。
+    -- 在上面例子中，登录服务器会注册为.login_master名字，相当于skynet.register(".login_master")
+    name = "login_master",
+    -- config, etc...
+}
+login(server)
+
+--[[
+    对一个客户端发送过来的token进行验证。
+    如果验证不能通过，可以通过error招聘异常。
+    如果验证通过，需要返回用户希望进入的登陆点及用户名(登录点可以包含在token内由用户自行决定，也可以实现一个负载均衡器来选择)
+]]
+function server.auth_handler(token) end
+--[[
+    当用户已经验证通过后，该如何通知具体的登录点(server)。框架会交给你用户名(uid)和已经安全交换到的通讯密钥。
+    你需要把它们交给登录点，并得到确认（等待登录点准备好后）才可以返回
+]]
+function server.login_handler(server, uid, secret) end
+-- 用来处理lua消息，必须注册
+function server.command_handler(command, ...) end
+```
+登录服务返回给客户端的状态码
+```lua
+200 [base64(subid)] -- 登录成功会返回一个subid，这个subid是这次登录的唯一标识
+400 Bad Request -- 握手失败
+401 Unauthorized -- 自定义的auth_handler不认可toket
+403 Forbidden -- 自定义的login_handler执行失败
+406 Not Accpetable -- 该用户已经在登录中。（只发生在multilogin关闭时）
+```
