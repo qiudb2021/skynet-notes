@@ -74,7 +74,7 @@ writeline(fd, crypt.base64encode(chmac))
 local token = {
     server = "sample",
     user = "hello",
-    pass = "password"
+    pass = "wrongpassword"
 }
 
 local function encode_token(token)
