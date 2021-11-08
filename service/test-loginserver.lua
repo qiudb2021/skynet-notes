@@ -27,8 +27,8 @@ end
 local subid = 0
 function server.login_handler( server, uid, secret )
     skynet.error(string.format( "%s@%s is login, secret is %s",uid, server, crypt.hexencode(secret) ))
-    error "login_handler"
     subid = subid + 1
+    skynet.sleep(500)
     return subid
 end
 
