@@ -474,7 +474,62 @@ function server.command_handler(command, ...) end
 ```lua
 200 [base64(subid)] -- 登录成功会返回一个subid，这个subid是这次登录的唯一标识
 400 Bad Request -- 握手失败
-401 Unauthorized -- 自定义的auth_handler不认可toket
+401 Unauthorized -- 自定义的auth_handler不认可token
 403 Forbidden -- 自定义的login_handler执行失败
 406 Not Accpetable -- 该用户已经在登录中。（只发生在multilogin关闭时）
+```
+## 15 msgserver
+### 15.1.1 api
+```lua
+-- uid, subid, server把一个登录名转换成uid, subid, servername三元组
+msgserver.userid(username)
+-- username把uid, subid, server三元组构造成一个登录名
+msgserver.username(uid, subid, server)
+
+-- 你需要在login_handler中调用它，注册一个登录名username对应 的secret
+msgserver.login(username, secret)
+-- 让一个登录名失效(登出)，通常在logout_handler里调用
+msgserver.logout(username)
+-- 查询一个登录名对应的连接的ip地址，如果没有关联的连接，会返回nil
+msgserver.ip(username)
+```
+### 15.1.2 msgserver模板
+```lua
+local msgserver = require "snax.msgserver"
+local server = {}
+-- 服务初始化函数，要把server表传递进去
+msgserver.start(server)
+
+-- 在打开端口时，会触发这个 register_handler 函数，参数name是在配置信息中配置的当前登录点的名字
+-- 需要在这个回调要做的事件是通知登录服务器，我这个登录点准备好了
+function server.register_handler(name)
+end
+
+-- 在一个用户登录后，登录服务器会转交给你这个用户的 uid 和 secret，最终触发 login_handler 方法
+-- 在这个函数里，你需要做的是判定这个用户是否真的可以登录。然后为用户生成一个subid，
+-- （使用msg.username(uid, subid, servername)可以得到这个用户这次的登录名。servername是当前这个登录点的名字）
+-- 在这个过程中，如果你发现一些意外情况，不希望用户进入，只需要用 error 抛出异常
+function server.login_handler(uid, secret)
+end
+
+-- 当一个用户想登出时，这个函数会被调用，可以在里面做一些清除操作
+function server.logout_handler(uid, subid)
+end
+
+-- 当外界（通常是登录服务器）希望一个用户登出时，会触发这个事件
+-- 发起一个logout消息（最终会触发 logout_handler ）
+function server.kick_handler(uid, subid)
+end
+
+-- 当用户的通讯连接断开后，会触发这个事件。可以利用这个事件做超时字处理（比如断开连接后一定时间不重新回来会就主动登出）
+function server.disconnect_handler(username)
+end
+
+-- 如果用户提起了一个请求，request_handler 会被调用。这里隐藏了 session 信息，
+-- 等处理完请求后，只需要返回一个字符串，这个字符串会回到框架，加上 session 回应客户端。
+-- 这个函数允许抛出异常，框架会正确的捕获这个异常，并通过协议通知客户端。
+function server.request_handler(username, msg, sz)
+end
+
+
 ```
