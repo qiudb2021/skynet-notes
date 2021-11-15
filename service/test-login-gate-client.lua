@@ -18,6 +18,7 @@ local function unpack_line(text)
     if from then
         return text:sub(1, from - 1), text:sub(from + 1);
     end
+    return nil, text
 end
 
 local last = ""
