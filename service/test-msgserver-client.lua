@@ -22,4 +22,5 @@ skynet.start(function (  )
 
     -- 关闭gate，也就是关掉监听套接字
     skynet.call(gate, "lua", "close")
+
 end)

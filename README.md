@@ -530,6 +530,8 @@ end
 -- 这个函数允许抛出异常，框架会正确的捕获这个异常，并通过协议通知客户端。
 function server.request_handler(username, msg, sz)
 end
-
-
 ```
+### 15.2 loginserver与msgserver
+要使用msgserver一般都要跟loginserver一起使用；客户端登录时，一般先登录loginserver，然后再去连接实际登录点，msgserver一般充当真实登录点的角色，原理如下
+![Image text](images/6-loginserver与msgserver.png)
+![Image text](images/7-loginserver与msgserver.png)
