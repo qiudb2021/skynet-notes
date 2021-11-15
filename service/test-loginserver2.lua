@@ -36,7 +36,7 @@ function CMD.register_gate( server, address )
     server_list[server] = address
 end
 
-function server.command_handler( command, ... )
+function server.command_handler( cmd, ... )
     local f = assert(CMD[cmd])
     return f(...)
 end
