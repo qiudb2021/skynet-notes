@@ -1,4 +1,4 @@
-package.path = "./skynet/lualib/?.so"
+package.cpath = "../skynet/luaclib/?.so"
 
 local socket = require "client.socket"
 local crypt = require "client.crypt"
@@ -14,7 +14,7 @@ local function writeline(fd, text)
 end
 
 local function unpack_line(text)
-    local from = string.find( text,"\n", true )
+    local from = text:find("\n",1,true)
     if from then
         return text:sub(1, from - 1), text:sub(from + 1);
     end
