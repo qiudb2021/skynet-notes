@@ -11,7 +11,7 @@ local server = {
 }
 
 function server.auth_handler( token )
-    local user, server, password = token:match "([^@]*)@([^#]*)#(.*)"
+    local user, server, password = token:match "([^@]*)@([^:]*):(.*)"
     user = crypt.base64decode(user)
     server = crypt.base64decode(server)
     password = crypt.base64decode(password)

@@ -44,6 +44,7 @@ local function unpack_f(f)
         while true do
             local result
             result, last = try_recv(fd, last)
+            print("result ", result, last)
             if result then
                 return result
             end
@@ -130,6 +131,8 @@ local function unpack_package(text)
         return nil, text
     end
 
+    print("first ", text:sub(3, 2 + s), "second ", text:sub(3 + s))
+
     return text:sub(3, 2 + s), text:sub(3 + s)
 end
 
@@ -137,6 +140,7 @@ end
 local readpackage = unpack_f(unpack_package)
 
 local function send_package(fd, pack)
+    print("send_package fd ",fd)
     -- 大端序，s计算字符长度，2字节整形表示
     local package = string.pack(">s2", pack)
     socket.send(fd, package)
@@ -148,7 +152,7 @@ local index = 1
 print("connect")
 -- 连接登录点对应的ip和端口
 fd = assert(socket.connect("127.0.0.1", 8002))
-last = ""
+print("fd", fd)
 
 local handshake = string.format( "%s@%s#%s:%d",
     crypt.base64encode(token.user),
@@ -161,8 +165,12 @@ local hmac = crypt.hmac64(crypt.hashkey(handshake), secret)
 -- 发送handshake
 send_package(fd, handshake..":"..crypt.base64encode(hmac))
 
+print("send package ok.")
+
+last = ""
 -- 接收应答
 print(readpackage())
+print("read package finished.")
 print("====>", send_request(text, 0))
 print("<====", recv_response(readpackage()))
 print("disconnect")

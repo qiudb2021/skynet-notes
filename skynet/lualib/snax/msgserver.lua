@@ -145,6 +145,7 @@ function server.start(conf)
 	end
 
 	function handler.connect(fd, addr)
+        skynet.error("connect form ", addr, "(fd=", fd, ")")
 		handshake[fd] = addr
 		gateserver.openclient(fd)
 	end
@@ -304,6 +305,7 @@ function server.start(conf)
 
 	function handler.message(fd, msg, sz)
 		local addr = handshake[fd]
+        skynet.error("fd", fd, " addr", addr)
 		if addr then
 			auth(fd,addr,msg,sz)
 			handshake[fd] = nil
