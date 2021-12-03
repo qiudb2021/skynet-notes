@@ -44,7 +44,6 @@ local function unpack_f(f)
         while true do
             local result
             result, last = try_recv(fd, last)
-            print("result ", result, last)
             if result then
                 return result
             end
@@ -113,6 +112,7 @@ end
 
 --解包数据
 local function recv_response(v)
+    print("#v", #v)
     local size = #v - 5
     -- cn: n字节字符串; B>I4: B unsigned char, I4大端序4字节unsigned int
     local content, ok, session = string.unpack("c"..tostring(size).."B>I4", v)
@@ -121,23 +121,30 @@ end
 
 -- 读取两个字节数据长度的包
 local function unpack_package(text)
-    local size = #text
-    if size < 2 then
-        return nil, text
-    end
-
-    local s = text:byte(1) * 256 + text.byte(2)
-    if size < s + 2 then
-        return nil, text
-    end
-
-    print("first ", text:sub(3, 2 + s), "second ", text:sub(3 + s))
-
-    return text:sub(3, 2 + s), text:sub(3 + s)
+        print("text",text)
+        return text, ""
 end
+
+-- 读取两个字节数据长度的包
+local function unpack_package2(text)
+      local size = #text
+                if size < 2 then
+                                return nil, text
+                                    end
+
+                                        local s = text:byte(1) * 256 + text.byte(2)
+                                            if size < s + 2 then
+                                                            return nil, text
+                                                                end
+
+                                                                    print("first ", text:sub(3, 2 + s), "second ", text:sub(3 + s))
+
+                                                                        return text:sub(3, 2 + s), text:sub(3 + s)
+                                                                end
 
 
 local readpackage = unpack_f(unpack_package)
+local readpackage2 = unpack_f(unpack_package2)
 
 local function send_package(fd, pack)
     print("send_package fd ",fd)

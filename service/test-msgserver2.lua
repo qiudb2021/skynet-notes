@@ -34,7 +34,7 @@ function server.disconnect_handler( username )
 end
 
 -- 当接收到客户端请求，这个回调函数会被调用，需要给予应答
-function server.request_handler( username, msgserver )
+function server.request_handler( username, msg )
     skynet.error("recv ", msg, " from ", username)
     return string.upper( msg )
 end

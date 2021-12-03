@@ -191,6 +191,7 @@ function server.start(conf)
 	end
 
 	local function auth(fd, addr, msg, sz)
+        skynet.error("start auth: fd",fd,addr)
 		local message = netpack.tostring(msg, sz)
 		local ok, result = pcall(do_auth, fd, message, addr)
 		if not ok then
@@ -258,6 +259,7 @@ function server.start(conf)
 			p = { fd }
 			u.response[session] = p
 			local ok, result = pcall(conf.request_handler, u.username, message)
+            skynet.error(ok, result)
 			-- NOTICE: YIELD here, socket may close.
 			result = result or ""
 			if not ok then
@@ -270,6 +272,7 @@ function server.start(conf)
 			p[2] = string.pack(">s2",result)
 			p[3] = u.version
 			p[4] = u.index
+            skynet.error(p[2])
 		else
 			-- update version/index, change return fd.
 			-- resend response.
@@ -285,6 +288,7 @@ function server.start(conf)
 		-- the return fd is p[1] (fd may change by multi request) check connect
 		fd = p[1]
 		if connection[fd] then
+            skynet.error("p2",p[2])
 			socketdriver.send(fd, p[2])
 		end
 		p[1] = nil

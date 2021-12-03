@@ -3,10 +3,10 @@
 ]]
 local skynet = require "skynet"
 
-skynet.init = function (  )
+skynet.init(function ()
     skynet.error("service init.")
-end
+end)
 
-skynet.start = function (  )
+skynet.start(function()
     skynet.error("service start") 
-end
+end)
